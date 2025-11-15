@@ -41,9 +41,9 @@ install("path/to/local_dir")
 ## Input
 
 The input of flowSim is a directory containing the bivariate marker expression of the images under analysis. In particular, the marker expression of each image must be reported in a csv file whose first and second column report the expression of, respectively, the first and second marker. Here's an example of a correctly formatted csv file:
-```{r, echo = FALSE}
+```{r, eval = FALSE}
 library(utils)
-df<-read.csv("data/data_example.csv")
+df<-read.csv("data_example.csv")
 print(df)
 ```
 
@@ -71,7 +71,7 @@ library(utils)
 out<-get_similarity_all_plots(path_dir = fpath)
 
 # Alternatively, it is possible to feed the list of paths (only V1 mode).
-paths_plots<-list.files(path = fpath,full.names = T)
+paths_plots<-list.files(path = fpath,full.names = TRUE)
 out<-get_similarity_all_plots(paths_plots = paths_plots)
 
 # get similarity scores matrix for all files (V2 mode, > 500 files).
@@ -96,7 +96,7 @@ inds_selected_files<-get_inds_files_selected(path_dir = fpath,
 # Where files_to_analyze = vector of files names to analyze.
 out<-get_similarity_all_plots_v2(n_samples=inds_selected_files,path_dir = fpath)
 
-# Analyze only 2nd and 3rd file path: based on list.files(fpath,full.names=T)
+# Analyze only 2nd and 3rd file path: based on list.files(fpath,full.names=TRUE)
 out<-get_similarity_all_plots_v2(n_samples=c(2,3),path_dir = fpath)
 
 ```
@@ -157,7 +157,7 @@ library(graphics)
 # The directory, the files paths and the features dataset are needed.
 
 fpath <- system.file("extdata", package="flowSim")
-paths_plots<-list.files(path = fpath,full.names = T)
+paths_plots<-list.files(path = fpath,full.names = TRUE)
 df_features<-import_df_features(paths_plots = paths_plots) 
 
 # Execution of the similarity generation step, igraph grouping 
@@ -213,7 +213,7 @@ The user can also visualize only a partial area of the network ("partial network
 
 ```{r,eval=FALSE}
 # plot network without the isolated files.
-plot_visnet(visnetdata,remove_single_files = T) # \donotrun.
+plot_visnet(visnetdata,remove_single_files = TRUE) # \donotrun.
 # plot only specific groups.
 plot_visnet(visnetdata,select_group = c("1"))
 ```
@@ -222,7 +222,7 @@ Finally, for very large networks (> 4000 files), it is not possible to plot the 
 
 ```{r,eval=FALSE}
 # generate contracted data.
-visnetdata_contracted<-gen_visnetwork_data(igraph_network,contract_net = T) # \donotrun.
+visnetdata_contracted<-gen_visnetwork_data(igraph_network,contract_net = TRUE) # \donotrun.
 # plot contracted network.
 plot_visnet(visnetdata_contracted) # \donotrun.
 ```

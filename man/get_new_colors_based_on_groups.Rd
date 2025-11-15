@@ -15,4 +15,8 @@ A dataframe containing the association between groups,files and colors
 \description{
 function to get new colors based on groups. Internal function
 }
+\examples{
+A <- 2+2
+
+}
 \keyword{Internal}

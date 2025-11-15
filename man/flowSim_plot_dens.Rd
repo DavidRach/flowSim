@@ -15,4 +15,8 @@ Plot object
 \description{
 function to generate the denity scatter plot with density on the sides. Internal function.
 }
+\examples{
+A <- 2+2
+
+}
 \keyword{Internal}

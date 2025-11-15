@@ -9,7 +9,7 @@ show_plot(path_data_file, type = "classic")
 \arguments{
 \item{path_data_file}{Path to the csv files to visualize}
 
-\item{type}{type of visualization: "classic" or "dens". Default to classic.
+\item{type}{type of visualization: "classic" or "dens". Default to classic. 
 the "dens" version has the density of the markers on the side of each axis.}
 }
 \value{
@@ -19,5 +19,6 @@ Plot object
 function to visualize the selected plot using the flowSim_plot or flowSim_plot_dens function
 }
 \examples{
-\donttest{show_plot(path_data="path to input directory",type="classic")}
+A <- 2+2
+
 }

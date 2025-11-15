@@ -9,7 +9,7 @@ get_groups_based_on_clustering(igraph_network, method = "louvain")
 \arguments{
 \item{igraph_network}{iGraph network object}
 
-\item{method_clust}{clustering method: louvain, infomap. Default to louvain}
+\item{method}{clustering method: louvain, infomap. Default to louvain}
 }
 \value{
 dataframe reporting groups association

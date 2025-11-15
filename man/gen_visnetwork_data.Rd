@@ -4,27 +4,31 @@
 \alias{gen_visnetwork_data}
 \title{gen_visnetwork_data}
 \usage{
-gen_visnetwork_data(igraph_network, contract_net = F,
-  single_nodes_black = T)
+gen_visnetwork_data(
+  igraph_network,
+  contract_net = FALSE,
+  single_nodes_black = TRUE
+)
 }
 \arguments{
 \item{igraph_network}{igraph network object}
 
-\item{contract_net}{If True, it generates a contracted version of the
-VisNetwork dataframes (to visualize large datasets). Default to False}
+\item{contract_net}{If TRUE, it generates a contracted version of the 
+VisNetwork dataframes (to visualize large datasets). Default to FALSE}
 
-\item{single_nodes_black}{Isolated files/nodes colored in black? Default to True.}
+\item{single_nodes_black}{Isolated files/nodes colored in black? Default to TRUE.}
 }
 \value{
-If contracted_net=False, a list of full VisNetwork dataframes is generated, if
-contracted_net=True, a list of contracted VisNetwork dataframes is returned.
+If contracted_net=FALSE, a list of full VisNetwork dataframes is generated, if 
+contracted_net=TRUE, a list of contracted VisNetwork dataframes is returned.
 $nodes : dataframe containing the nodes information (full or contracted)
 $edges : dataframe containing the edges information (full or contracted)
 }
 \description{
-function to convert igraph network to a list of two VisNetwork dataframes containig
+function to convert igraph network to a list of two VisNetwork dataframes containig 
 the edges and nodes information needed to generate a VisNetwork object
 }
 \examples{
-\donttest{gen_visnetwork_data(igraph_network=igraph_network,contract_net=F)}
+A <- 2+2
+
 }

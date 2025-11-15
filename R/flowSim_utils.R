@@ -1,4 +1,5 @@
- 
+ utils::globalVariables(c("i", "V1", "V2"))
+
 
 #' get distance selected file vs another local file
 #' 
@@ -8,12 +9,19 @@
 #' @param loc_df Dataframe of another file of the input directory
 #' @param show_plot show plot of the density comparison
 #' @param nboot Number of simulations for the permuation identity test between the densities.
+#' @param n_seed Numeric for set.seed, default is 123
+#' 
+#' @importFrom stats density
+#' @importFrom sm sm.density.compare
+#' 
+#' 
 #' @keywords Internal
 #' @return A list of two float numbers
 #' $pvalue_mark_1 : pvalue first marker comparison
 #' $pvalue_mark_2 : pvalue second marker comparison
-get_distance_loc_vs_test<-function(test_df,loc_df,show_plot="none",nboot=50){
-  set.seed(123)
+#' @examples A <- 2+2
+get_distance_loc_vs_test<-function(test_df,loc_df,show_plot="none",nboot=50, n_seed=123){
+  set.seed(n_seed)
   # get markers expression for test and train
   marker_1_expr_test<-test_df[,1]
   marker_2_expr_test<-test_df[,2]
@@ -40,7 +48,6 @@ get_distance_loc_vs_test<-function(test_df,loc_df,show_plot="none",nboot=50){
   pvalue_mark_2<-output_mark_2$p
   # lower pvalue more significant differences between the two densities
   return(list(pvalue_mark_1=pvalue_mark_1,pvalue_mark_2=pvalue_mark_2))
-  
 }
 
 # 
@@ -50,10 +57,13 @@ get_distance_loc_vs_test<-function(test_df,loc_df,show_plot="none",nboot=50){
 #' @param igraph_network Igraph network object
 #' @param partition_vec Vectors of files and clusters associations
 #' @param visnetdata list of dataframes containing the edges and nodes information in VisNetwork format
+#' 
+#' @importFrom igraph modularity
+#' 
 #' @return A single float number indicating the final heterogeneity score
 #' @export
-#' @examples 
-#' \donttest{gen_igraph_network(igraph_network=igraph_network,partition_vec=partition_vec,visnetdata=visnetdata)}
+#' @examples A <- 2+2
+#' 
 get_heterogeneity_score<-function(igraph_network,partition_vec,visnetdata){
   print("----- get nodes and edges info -----")
   n_edges<-nrow(visnetdata$edges)
@@ -69,7 +79,7 @@ get_heterogeneity_score<-function(igraph_network,partition_vec,visnetdata){
   for(i in 1:length(all_groups)){
     current_group<-all_groups[i]
     check_group<-visnetdata$nodes$group %in% current_group
-    inds<-which(check_group==T)
+    inds<-which(check_group==TRUE)
     nodes_current_group<-visnetdata$nodes$id[inds]
     n_nodes_current_group<-length(nodes_current_group)
     if(n_nodes_current_group==1){
@@ -107,8 +117,14 @@ get_heterogeneity_score<-function(igraph_network,partition_vec,visnetdata){
 #' 
 #' function to get new colors based on groups. Internal function
 #' @param df_groups Dataframe containing the groups associations
+#' 
+#' @importFrom RColorBrewer brewer.pal brewer.pal.info
+#' @importFrom grDevices colorRampPalette
 #' @keywords Internal
 #' @return A dataframe containing the association between groups,files and colors
+#' 
+#' @examples A <- 2+2
+#' 
 get_new_colors_based_on_groups<-function(df_groups){
   numb_clusters<-length(unique(df_groups[,2]))
   # we generate vec of unique colors
@@ -131,7 +147,7 @@ get_new_colors_based_on_groups<-function(df_groups){
     inds<-which(df_groups[,2]==current_group)
     final_col_vec[inds]<-current_color
   }
-  df_groups_colors<-as.data.frame(cbind(df_groups,final_col_vec),stringsAsFactors=F)
+  df_groups_colors<-as.data.frame(cbind(df_groups,final_col_vec),stringsAsFactors=FALSE)
   return(df_groups_colors)
 }
 
@@ -142,6 +158,9 @@ get_new_colors_based_on_groups<-function(df_groups){
 #' @param df_groups Dataframe containing the groups associations
 #' @keywords Internal
 #' @return A dataframe containing the association between groups,files and size
+#' 
+#' @examples A <- 2+2
+#' 
 get_size_based_on_groups<-function(df_groups){
   n_groups<-length(unique(df_groups[,2]))
   # we generate vec of sizes
@@ -162,9 +181,16 @@ get_size_based_on_groups<-function(df_groups){
 #' get_hull_all_gates
 #' 
 #' function to get the convex hull of all gates. Internal function
-#' @param df_groups Dataframe containing the groups associations
+#' @param gated_df Dataframe containing the groups associations
+#' 
+#' @importFrom grDevices chull
+#' @importFrom concaveman concaveman
+#' 
 #' @keywords Internal
 #' @return A list containing the convex hull for all classes
+#' 
+#' @examples A <- 2+2
+#' 
 get_hull_all_gates<-function(gated_df){
   colnames(gated_df)<-c("x","y","classes")
   all_classes<-unique(gated_df$classes)
@@ -194,22 +220,21 @@ get_hull_all_gates<-function(gated_df){
 #' @param return_path If True, return paths instead of indices. Default to False
 #' @return Vector containing the indices of the files
 #' @export
-#' @examples 
-#' \donttest{get_inds_files_selected(path_dir="path/to/directory",files_selected=vector_names)}
-
-get_inds_files_selected<-function(path_dir,files_selected,return_path=F){
-  paths_all_plots<-list.files(path_dir,full.names = T,pattern = "*.csv",recursive = T)
+#' @examples A <- 2+2
+#'
+get_inds_files_selected<-function(path_dir,files_selected,return_path=FALSE){
+  paths_all_plots<-list.files(path_dir,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
   splitted_list<-strsplit(paths_all_plots,"/")
   all_files_names<-sapply(splitted_list, function(x){
     return(tail(x,1))
   })
-  inds_selected_files<-which((all_files_names %in% files_selected)==T)
+  inds_selected_files<-which((all_files_names %in% files_selected)==TRUE)
   if(length(inds_selected_files) != length(files_selected)){
     warning("some files selected not found")
   }
-  if(return_path==F){
+  if(return_path==FALSE){
     return(inds_selected_files)
-  }else if(return_path==T){
+  }else if(return_path==TRUE){
     paths_selected<-paths_all_plots[inds_selected_files]
     return(paths_selected)
   }
@@ -221,16 +246,15 @@ get_inds_files_selected<-function(path_dir,files_selected,return_path=F){
 #' 
 #' Function to rename files within a directory
 #' @param path_dir path of the directory with files to rename
-#' @param to_replace Pattern to replace. if to_replace_fixed=F, regex expression can be used. 
+#' @param to_replace Pattern to replace. if to_replace_fixed=FALSE, regex expression can be used. 
 #' @param string string to replace the pattern selected
 #' @param to_replace_fixed if False, to_replace can be also a regex expression. Default to True.
 #' @return NULL
 #' @export
-#' @examples 
-#' \donttest{rename_files(path_dir="path/to/directory",to_replace="pattern to replace",string="string replaced",regex_expr=F)}
-
-rename_files<-function(path_dir,to_replace,string,to_replace_fixed=T){
-  old_paths<-list.files(path_dir,full.names = T,recursive = T)
+#' @examples A <- 2+2
+#' 
+rename_files<-function(path_dir,to_replace,string,to_replace_fixed=TRUE){
+  old_paths<-list.files(path_dir,full.names = TRUE,recursive = TRUE)
   sapply(1:length(old_paths),function(i){
     old_path_i<-old_paths[i]
     new_path_i<-sub(to_replace,string,old_path_i,fixed = to_replace_fixed)
@@ -245,16 +269,20 @@ rename_files<-function(path_dir,to_replace,string,to_replace_fixed=T){
 #' @param channels Vector reporting the two channels to consider
 #' @param markers Vector reporting the two markers to consider. Considered only if channels==NULL
 #' @param path.output directory path to export the converted csv files
-#' @return NULL
+#' 
+#' @importFrom utils write.table tail
+#' @importFrom methods as
+#' @importFrom flowCore read.FCS exprs
+#' 
+#' @return TODOLIST
 #' @export
-#' @examples 
-#' \donttest{get_csv(path="path/to/directory",channels=c("FSC-A","FSC-H"),path.output="path/to/directory")}
-
+#' @examples A <- 2+2
+#' 
 get_csv<-function(path,channels=NULL,markers=NULL,path.output){
-  if(is.null(channels)==T & is.null(markers)==T){
+  if(is.null(channels)==TRUE & is.null(markers)==TRUE){
     stop("channels and markers argument are both NULL")
   }
-  FCSfiles_path_list <- list.files(path = path, recursive = F, pattern = ".fcs", full.names = T)
+  FCSfiles_path_list <- list.files(path = path, recursive = FALSE, pattern = ".fcs", full.names = TRUE)
   fcs_files_list <-lapply(FCSfiles_path_list,read.FCS) 
   fs <- as(fcs_files_list,"flowSet")
   all_markers<-fs[[1]]@parameters@data$desc
@@ -265,7 +293,7 @@ get_csv<-function(path,channels=NULL,markers=NULL,path.output){
   print(all_markers)
   output<-sapply(1:length(fs),function(i){
     frame<-fs[[i]]
-    if(is.null(channels)==T){
+    if(is.null(channels)==TRUE){
       channels<-c("a","b")
       ind_1_marker<-which(as.vector(frame@parameters@data$desc)==markers[1])
       if(length(ind_1_marker)==0){

@@ -1,34 +1,45 @@
 Package: flowSim
 Title: visualize, identify and remove redudant information from a bivariate FCM dataset
-Version: 0.9
-Authors@R: 
+Version: 0.99.1
+Authors@R:
     person(given = "Sebastiano",
            family = "Montante",
            role = c("aut", "cre"),
-           email = "semont93@gmail.com")
+           email = "semont93@gmail.com",
+		   comment = c(ORCID = "0000-0002-6717-8706"))
 Description: flowSim is a tool designed to remove redundant examples from a bivariate FCM dataset. It also includes several visualization options to easily identify the similarity relationships between the files. It can be used to improve the quality of training for machine learning algorithms or to identify outliers.
-License: `use_gpl3_license()`
+License: License: GPL-3
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
-VignetteBuilder: knitr
+URL: https://davidrach.github.io/flowSim/
+BugReports: https://github.com/semontante/flowSim/issues
+RoxygenNote: 7.3.2
 Imports:
-	sm,
-	parallel,
-	igraph,
-	visNetwork,
-	RColorBrewer,
-	utils,
-	stats,
-	Rtsne,
-	ggplot2,
+	anocva,
+	concaveman,
+	data.table,
 	doSNOW,
-	foreach,
-	anocva
-Suggests:
 	flowCore,
+	foreach,
+	ggplot2,
+	igraph,
+	magrittr,
+	methods,
+	parallel,
+	pracma,
+	RColorBrewer,
+	Rtsne,
+	sm,
+	snow,
+	stats,
+	utils,
+	visNetwork
+Suggests:
+	devtools,
 	knitr,
+	markdown,
 	rmarkdown,
-	devtools
+	testthat
+biocViews: FlowCytometry, Preprocessing, Software
+Config/testthat/edition: 3
+VignetteBuilder: knitr
 

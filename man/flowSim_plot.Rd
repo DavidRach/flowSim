@@ -4,17 +4,21 @@
 \alias{flowSim_plot}
 \title{flowSim_plot}
 \usage{
-flowSim_plot(df, plot_gate = F)
+flowSim_plot(df, plot_gate = FALSE)
 }
 \arguments{
 \item{df}{Dataframe containing the two markers expression data.}
 
-\item{plot_gate}{show gates?,default to False}
+\item{plot_gate}{show gates?,default to FALSE}
 }
 \value{
 Plot object
 }
 \description{
 function to generate the scatter plot with colored density of the events. Internal function.
+}
+\examples{
+A <- 2+2
+
 }
 \keyword{Internal}

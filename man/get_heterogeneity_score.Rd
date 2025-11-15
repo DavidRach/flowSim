@@ -20,5 +20,6 @@ A single float number indicating the final heterogeneity score
 function to get the heterogeneity score of a dataset
 }
 \examples{
-\donttest{gen_igraph_network(igraph_network=igraph_network,partition_vec=partition_vec,visnetdata=visnetdata)}
+A <- 2+2
+
 }

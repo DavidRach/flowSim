@@ -8,10 +8,15 @@
 #' If path_output=NULL, no plots are generated. Default to NULL
 #' @param n_cores Number of cores to use. Default to 1
 #' @param path_gates Path of gates data, default to NULL
+#' @param type Default dens, TODOLIST
+#' 
+#' @importFrom grDevices dev.off png
+#' @importFrom parallel mclapply
+#' @importFrom utils read.csv
+#' 
 #' @return A list of all file names for each group.
 #' @export
-#' @examples 
-#' \donttest{exports_plots(visnetdata=visnetdata,path_expr_data="path to input directory",path_output=NULL,n_cores=1)}
+#' @examples A <- 2+2
 exports_plots<-function(visnetdata,path_expr_data,path_output=NULL,n_cores=1,type="dens",
                         path_gates=NULL){
   nodes_data<-visnetdata$nodes
@@ -19,7 +24,7 @@ exports_plots<-function(visnetdata,path_expr_data,path_output=NULL,n_cores=1,typ
   groups<-unique(nodes_data$group)
   # get path expression files
   print("----- get path expression files")
-  path_exprs_data_files<-list.files(path_expr_data,full.names = T,pattern = "*.csv",recursive = T)
+  path_exprs_data_files<-list.files(path_expr_data,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
   path_exprs_data_files_vec<-sapply(1:length(path_exprs_data_files),function(i){
     current_path<-path_exprs_data_files[i]
     splitted_path<-strsplit(current_path,"/")[[1]]
@@ -27,24 +32,24 @@ exports_plots<-function(visnetdata,path_expr_data,path_output=NULL,n_cores=1,typ
     return(name_path)
   })
   # path_exprs_data_files_vec contains only the names of the files without the path
-  if(is.null(path_gates)==F){
+  if(is.null(path_gates)==FALSE){
     print("----- get gates data path")
-    gates_files_paths<-list.files(path_gates,full.names = T,pattern = "*.csv",recursive = T)
+    gates_files_paths<-list.files(path_gates,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
   }
   # export plots
   print("----- export plots")
   info_exporting<-mclapply(1:length(groups),function(i){
     current_group<-groups[i]
     print(sprintf("current group exporting: %s",current_group))
-    if(is.null(path_output)==F){
+    if(is.null(path_output)==FALSE){
       path_output_group<-paste0(path_output,sprintf("/group_%s",current_group))
-      suppressWarnings(dir.create(path_output_group,recursive = T))
+      suppressWarnings(dir.create(path_output_group,recursive = TRUE))
     }
     inds<-which(nodes_data$group==current_group)
     samples_names_group_i<-nodes_data$id[inds]
     print("samples names current group:")
     print(samples_names_group_i)
-    if(is.null(path_output)==F){
+    if(is.null(path_output)==FALSE){
       for(sample_name in samples_names_group_i){
         # get writing path current file
         path_output_file<-paste0(path_output_group,sprintf("/%s.png",sample_name))
@@ -54,27 +59,27 @@ exports_plots<-function(visnetdata,path_expr_data,path_output=NULL,n_cores=1,typ
           stop("0 or multiple matches for sample name to export")
         }
         df_exprs<-read.csv(path_exprs_data_files[ind])
-        if(is.null(path_gates)==F){
-          ind<-grep(sample_name,gates_files_paths,fixed = T)
+        if(is.null(path_gates)==FALSE){
+          ind<-grep(sample_name,gates_files_paths,fixed = TRUE)
           if(length(ind)==0){
             # open file
-            png(file = path_output_file,  width = 800, height = 800)
+            png(filename = path_output_file,  width = 800, height = 800)
             flowSim_plot(df_exprs) # generate image
             # close file
             dev.off()
           }else{
-            df_gate<-read.csv(gates_files_paths[ind],check.names = F)
+            df_gate<-read.csv(gates_files_paths[ind],check.names = FALSE)
             df_exprs_final<-cbind(df_exprs,df_gate[,1])
             # open file
-            png(file = path_output_file,  width = 800, height = 800)
-            flowSim_plot(df_exprs_final,plot_gate=T) # generate image with gates
+            png(filename = path_output_file,  width = 800, height = 800)
+            flowSim_plot(df_exprs_final,plot_gate=TRUE) # generate image with gates
             # close file
             dev.off()
           }
           
         }else{
           # open file
-          png(file = path_output_file,  width = 800, height = 800)
+          png(filename = path_output_file,  width = 800, height = 800)
           flowSim_plot(df_exprs) # generate image
           # close file
           dev.off()
@@ -101,15 +106,20 @@ exports_plots<-function(visnetdata,path_expr_data,path_output=NULL,n_cores=1,typ
 #' by the hierarchical clustering. Default to 2.1
 #' @param plot_dendrogram If True, the plot of the dendrogram is generated (It may fail for some groups). Default to False.
 #' @param seed_n Set seed number. Default to 40.
+#' @param type Default dens TODOLIST
+#' 
+#' @importFrom parallel mclapply
+#' @importFrom utils write.csv tail
+#' @importFrom stats dist hclust cutree
+#' @importFrom grDevices png dev.off
+#' 
 #' @return A list of the selected files names to keep for each group
 #' @export
-#' @examples 
-#' \donttest{exports_filtered_plots(visnetdata=visnetdata,df_features=df_features,
-#' path_expr_data="path to input directory",path_output=NULL,n_cores=1,filter_thr=2.1,plot_dendrogram=F)}
+#' @examples A <- 2+2
 
 exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
                                  path_output=NULL,n_cores=1,type="dens",filter_thr=2.1,
-                                 plot_dendrogram=F,seed_n=40){
+                                 plot_dendrogram=FALSE,seed_n=40){
   set.seed(seed_n)
   nodes_data<-visnetdata$nodes
   nodes_data$group<-as.numeric(nodes_data$group)
@@ -121,9 +131,9 @@ exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
     current_group<-groups[i]
     #--------- get samples names current group
     print(sprintf("current group exporting: %s",current_group))
-    if(is.null(path_output)==F){
+    if(is.null(path_output)==FALSE){
       path_output_group<-paste0(path_output,sprintf("/group_%s",current_group))
-      suppressWarnings(dir.create(path_output_group,recursive = T))
+      suppressWarnings(dir.create(path_output_group,recursive = TRUE))
     }
     inds<-which(nodes_data$group==current_group)
     samples_names_group_i<-nodes_data$id[inds]
@@ -134,45 +144,45 @@ exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
     }else{
       # ------- get features of the samples of the current group
       check_vec<-row.names(df_features) %in% samples_names_group_i
-      inds<-which(check_vec==T)
+      inds<-which(check_vec==TRUE)
       df_features_group<-df_features[inds,]
-      if(is.null(path_output)==F){
+      if(is.null(path_output)==FALSE){
         path_file<-paste0(path_output_group,sprintf("/df_features_%s.csv",current_group))
-        write.csv(df_features_group,file = path_file,row.names = T)
+        write.csv(df_features_group,file = path_file,row.names = TRUE)
       }  
       #---- scale features ---
       inds_to_scale<-c(1,2,5,6,7,8)
       df_features_group_scaled_temp<-abs(scale(df_features_group[,inds_to_scale]))
       df_features_group_scaled<-cbind(df_features_group_scaled_temp,df_features_group[,-inds_to_scale])
-      if(is.null(path_output)==F){
+      if(is.null(path_output)==FALSE){
         path_file<-paste0(path_output_group,sprintf("/df_features_scaled_%s.csv",current_group))
-        write.csv(df_features_group_scaled,file = path_file,row.names = T)
+        write.csv(df_features_group_scaled,file = path_file,row.names = TRUE)
       }
       #----------- get subgroups (clustering)
       dist_obj<-dist(df_features_group_scaled,method = "euclidean")
-      df_dist<-as.data.frame(as.matrix(dist_obj),stringsAsFactors=F)
+      df_dist<-as.data.frame(as.matrix(dist_obj),stringsAsFactors=FALSE)
       row.names(df_dist)<-row.names(df_features_group_scaled)
       out_hclustering<-hclust(dist_obj,method = "complete")
       clusters<-cutree(tree = out_hclustering,h = filter_thr)
-      if(is.null(path_output)==F){
+      if(is.null(path_output)==FALSE){
         path_file<-paste0(path_output_group,sprintf("/df_dist_%s.csv",current_group))
-        write.csv(df_dist,file = path_file,row.names = T)
+        write.csv(df_dist,file = path_file,row.names = TRUE)
       }
       #--------- plot clustering
-      if(plot_dendrogram==T){
+      if(plot_dendrogram==TRUE){
         path_output_file<-paste0(path_output_group,sprintf("/clustering_%s.png",current_group))
         # open file
-        png(file = path_output_file,  width = 800, height = 800)
+        png(filename = path_output_file,  width = 800, height = 800)
         plot(out_hclustering)
         # close file
         dev.off()
       }
       # ------- get one sample from each subgroup 
-      df_features_sub_groups<-as.data.frame(cbind(row.names(df_features_group),clusters),stringsAsFactors=F)
+      df_features_sub_groups<-as.data.frame(cbind(row.names(df_features_group),clusters),stringsAsFactors=FALSE)
       colnames(df_features_sub_groups)<-c("samples_name","clusters")
-      if(is.null(path_output)==F){
+      if(is.null(path_output)==FALSE){
         path_file<-paste0(path_output_group,sprintf("/clustering_%s.csv",current_group))
-        write.csv(df_features_sub_groups,file = path_file,row.names = F)
+        write.csv(df_features_sub_groups,file = path_file,row.names = FALSE)
       }
       unique_subgroups<-unique(df_features_sub_groups$clusters)
       samples_names_selected<-rep("a",length(unique_subgroups))
@@ -187,10 +197,10 @@ exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
       }
     }
     #---------- export samples selected---------------
-    if(is.null(path_output)==F){
+    if(is.null(path_output)==FALSE){
       ################ get path expression files ----------
       print("----- get path expression files -----")
-      path_exprs_data_files<-list.files(path_expr_data,full.names = T,pattern = "*.csv",recursive = T)
+      path_exprs_data_files<-list.files(path_expr_data,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
       path_exprs_data_files_vec<-sapply(1:length(path_exprs_data_files),function(i){
         current_path<-path_exprs_data_files[i]
         splitted_path<-strsplit(current_path,"/")[[1]]
@@ -209,7 +219,7 @@ exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
         }
         df_exprs<-read.csv(path_exprs_data_files[ind])
         # open file
-        png(file = path_output_file,  width = 800, height = 800)
+        png(filename = path_output_file,  width = 800, height = 800)
         flowSim_plot(df_exprs) # generate image
         # close file
         dev.off()
@@ -219,7 +229,7 @@ exports_filtered_plots<-function(visnetdata,df_features,path_expr_data,
     return(c(current_group,samples_names_selected))
   },mc.cores = n_cores)
   info_exporting<-do.call(rbind,info_exporting)
-  info_exporting_df<-as.data.frame(info_exporting,stringsAsFactors=F)
+  info_exporting_df<-as.data.frame(info_exporting,stringsAsFactors=FALSE)
   colnames(info_exporting_df)<-c("group","files_filtered")
   vec<-as.character(info_exporting_df$files_filtered)
   vec_filtered<-unlist(strsplit(vec,split = ";"))

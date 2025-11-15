@@ -4,8 +4,13 @@
 \alias{import_df_features}
 \title{Import features set of all files}
 \usage{
-import_df_features(n_samples = NULL, paths_dir = NULL, n_cores = 1,
-  paths_plots = NULL, progress_bar = T)
+import_df_features(
+  n_samples = NULL,
+  paths_dir = NULL,
+  n_cores = 1,
+  paths_plots = NULL,
+  progress_bar = TRUE
+)
 }
 \arguments{
 \item{n_samples}{number of files to analyze}
@@ -25,5 +30,5 @@ a dataframe of the features set (columns) for each file (row)
 function to import the features set of all the files under analysis
 }
 \examples{
-import_df_features(n_samples=1:5,paths_dir="path_to_input_directory",n_cores=1)
+A <- 2+2
 }

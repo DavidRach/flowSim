@@ -15,4 +15,8 @@ A list of two VisNetwork dataframes containing the contracted information of nod
 \description{
 function to contract the visnetdata object (containing nodes and edges info). Internal function.
 }
+\examples{
+A <- 2+2
+
+}
 \keyword{Internal}

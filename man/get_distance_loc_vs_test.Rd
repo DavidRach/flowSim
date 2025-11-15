@@ -4,8 +4,13 @@
 \alias{get_distance_loc_vs_test}
 \title{get distance selected file vs another local file}
 \usage{
-get_distance_loc_vs_test(test_df, loc_df, show_plot = "none",
-  nboot = 50)
+get_distance_loc_vs_test(
+  test_df,
+  loc_df,
+  show_plot = "none",
+  nboot = 50,
+  n_seed = 123
+)
 }
 \arguments{
 \item{test_df}{Dataframe of selected file}
@@ -15,6 +20,8 @@ get_distance_loc_vs_test(test_df, loc_df, show_plot = "none",
 \item{show_plot}{show plot of the density comparison}
 
 \item{nboot}{Number of simulations for the permuation identity test between the densities.}
+
+\item{n_seed}{Numeric for set.seed, default is 123}
 }
 \value{
 A list of two float numbers
@@ -22,7 +29,10 @@ $pvalue_mark_1 : pvalue first marker comparison
 $pvalue_mark_2 : pvalue second marker comparison
 }
 \description{
-function to compare the similiraty between selected file and
+function to compare the similiraty between selected file and 
 another file of the input directory based on the density of marker expression values. Internal function.
+}
+\examples{
+A <- 2+2
 }
 \keyword{Internal}

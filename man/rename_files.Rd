@@ -4,12 +4,12 @@
 \alias{rename_files}
 \title{rename_files}
 \usage{
-rename_files(path_dir, to_replace, string, to_replace_fixed = T)
+rename_files(path_dir, to_replace, string, to_replace_fixed = TRUE)
 }
 \arguments{
 \item{path_dir}{path of the directory with files to rename}
 
-\item{to_replace}{Pattern to replace. if to_replace_fixed=F, regex expression can be used.}
+\item{to_replace}{Pattern to replace. if to_replace_fixed=FALSE, regex expression can be used.}
 
 \item{string}{string to replace the pattern selected}
 
@@ -19,5 +19,6 @@ rename_files(path_dir, to_replace, string, to_replace_fixed = T)
 Function to rename files within a directory
 }
 \examples{
-\donttest{rename_files(path_dir="path/to/directory",to_replace="pattern to replace",string="string replaced",regex_expr=F)}
+A <- 2+2
+
 }

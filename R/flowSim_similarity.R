@@ -1,10 +1,25 @@
 
-
+#' Internal for 
+#' 
+#' @param list_all_input_dfs TODOLIST
+#' @param name_ref_plot TODOLIST
+#' @param n_cores TODOLIST
+#' @param names_analyzed_vec TODOLIST
+#' @param n_boots TODOLIST
+#' @param test Default is "sm"
+#' 
+#' @importFrom parallel mclapply
+#' 
+#' @return TODOLIST
+#' 
+#' @examples A <- 2+2
+#' 
+#' @noRd
 get_similarity_selected_plot<-function(list_all_input_dfs,name_ref_plot,n_cores,
                                        names_analyzed_vec,n_boots,test="sm"){
   #---------- select expression reference plot name --------
   #print(sprintf("----- import expression reference plot selected: %s --------",name_ref_plot))
-  ind<-which((names(list_all_input_dfs) %in% name_ref_plot)==T)
+  ind<-which((names(list_all_input_dfs) %in% name_ref_plot)==TRUE)
   if(length(ind)==0){
     stop("ref plot not found")
   }else if(length(ind)>1){
@@ -21,7 +36,7 @@ get_similarity_selected_plot<-function(list_all_input_dfs,name_ref_plot,n_cores,
     df<-list_all_input_dfs[[i]]
     plot_name_to<-names(list_all_input_dfs)[i]
     check_repetition<-plot_name_to %in% names_analyzed_vec
-    if(check_repetition==F){
+    if(check_repetition==FALSE){
       # calculate distance between selected ref data and test 
       sink("/dev/null")
       on.exit(sink())
@@ -48,13 +63,30 @@ get_similarity_selected_plot<-function(list_all_input_dfs,name_ref_plot,n_cores,
   return(df_scores)
 }
 
-
+#' Internal for 
+#' 
+#' @param n_samples Default NULL
+#' @param path_dir Default NULL
+#' @param thr_score Default 0.6
+#' @param n_cores Default 1
+#' @param nboots Default NULL
+#' @param paths_plots Default NULL
+#' 
+#' @importFrom parallel mclapply
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' 
+#' @return TODOLIST
+#' 
+#' @examples A <- 2+2
+#' 
+#' @noRd
 get_similarity_all_plots<-function(n_samples=NULL,path_dir=NULL,thr_score=0.6,
                                    n_cores=1,nboots=NULL,paths_plots=NULL){
   start<-Sys.time()
   #---------- Pre-allocation of input dfs-------------------
   print("------- Pre-allocation of data --------")
-  list_all_input_dfs<-import_all_dfs(n_samples=n_samples,paths_dir = path_dir,n_cores = n_cores,paths_plots = paths_plots)
+  list_all_input_dfs<-import_all_dfs(n_samples=n_samples,paths_dir = path_dir,
+    n_cores = n_cores,paths_plots = paths_plots)
   #------------ Get all plot names ---------------
   # plot names will be  the nodes of our network
   print(sprintf("Total number of plots: %s",length(list_all_input_dfs)))
@@ -67,10 +99,10 @@ get_similarity_all_plots<-function(n_samples=NULL,path_dir=NULL,thr_score=0.6,
   }else if(length(list_all_input_dfs)<500){
     n_boots<-20
   }else{
-    warning("Memory warning: Too many files, use flowSim batches approach: get_similarity_all_plots_v2",immediate. = T)
+    warning("Memory warning: Too many files, use flowSim batches approach: get_similarity_all_plots_v2",immediate. = TRUE)
     n_boots<-20
   }
-  if(is.null(nboots)==F){
+  if(is.null(nboots)==FALSE){
     n_boots<-nboots
   }
   #---------- get similarity scores -------------------
@@ -83,8 +115,9 @@ get_similarity_all_plots<-function(n_samples=NULL,path_dir=NULL,thr_score=0.6,
     current_plot_name<-plot_names[i]
     # print("-------------reference name:")
     # print(current_plot_name)
-    df_scores<-get_similarity_selected_plot(list_all_input_dfs = list_all_input_dfs,name_ref_plot = current_plot_name,
-                                            n_cores = n_cores, names_analyzed_vec=names_already_analyzed,n_boots = n_boots)
+    df_scores<-get_similarity_selected_plot(list_all_input_dfs = list_all_input_dfs,
+      name_ref_plot = current_plot_name, n_cores = n_cores,
+      names_analyzed_vec=names_already_analyzed,n_boots = n_boots)
     names_already_analyzed[i]<-current_plot_name
     list_df_scores[[i]]<-df_scores
     setTxtProgressBar(pb,i)
@@ -98,7 +131,7 @@ get_similarity_all_plots<-function(n_samples=NULL,path_dir=NULL,thr_score=0.6,
   # remove loops (connections to same node)
   print("----- remove loops")
   check_loop<-df_scores_all_plots$from == df_scores_all_plots$to
-  inds<-which(check_loop==T)
+  inds<-which(check_loop==TRUE)
   if(length(inds)!=0){
     df_scores_all_plots<-df_scores_all_plots[-inds,]
   }
@@ -121,15 +154,50 @@ get_similarity_all_plots<-function(n_samples=NULL,path_dir=NULL,thr_score=0.6,
   print("Done")
   return(list(edges=df_scores_all_plots,nodes=df_nodes))
 }
-# kmeans function
+
+
+#' Internal kmeans wrapper
+#' @param dist TODOLIST
+#' @param k TODOLIST
+#' @importFrom stats kmeans
+#' @return TODOLIST
+#' @examples A <- 2+2
+#' @noRd
 myKmeans <- function(dist, k){
   return(kmeans(dist, k, iter.max = 50, nstart = 5)$cluster)
 }
-# function to get an approximate version of the similarity (for very big datasets)
+
+
+#' function to get an approximate version of the similarity (for very big datasets)
+#'
+#' @param n_samples Default NULL
+#' @param path_dir Default NULL
+#' @param thr_score Default 0.9
+#' @param n_cores Default 1
+#' @param n_batches Default NULL
+#' @param show_tsne_plot Default TRUE
+#' @param progress_bar Default TRUE
+#' @param size_points_tsne Default 5
+#' @param nboots Default 6
+#' @param n_seed Default is 40
+#' 
+#' @importFrom ggplot2 ggplot aes geom_point theme
+#'  element_blank element_line element_text
+#' @importFrom methods show
+#' @importFrom Rtsne Rtsne
+#' @importFrom utils tail
+#' @importFrom anocva nClust
+#' 
+#' @return TODOLIST
+#' 
+#' @examples A <- 2+2
+#' 
+#' @noRd
 get_similarity_all_plots_v2<-function(n_samples=NULL,path_dir,thr_score=0.9,
-                                      n_cores=1,n_batches=NULL,show_tsne_plot=T,
-                                      progress_bar=T,size_points_tsne=5,nboots=6){
-  set.seed(40)
+                                      n_cores=1,n_batches=NULL,show_tsne_plot=TRUE,
+                                      progress_bar=TRUE,size_points_tsne=5,nboots=6,
+                                      n_seed=40){
+  set.seed(n_seed)
   start<-Sys.time()
   #---------- Features df -------------------
   print("------- Features df generation --------")
@@ -143,26 +211,26 @@ get_similarity_all_plots_v2<-function(n_samples=NULL,path_dir,thr_score=0.9,
   if(nrow(df_features)<=3){
     stop("V2 mode can be executed only with >3 files")
   }else if(nrow(df_features)<=10){
-    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 1,check_duplicates = F))$Y)
+    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 1,check_duplicates = FALSE))$Y)
     print("perplexity: 1")
     max_clust_value<-nrow(df_features)-1
   }else if(nrow(df_features)<=30){
     warning("low number of files, use V1 mode")
-    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 1,check_duplicates = F))$Y)
+    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 1,check_duplicates = FALSE))$Y)
     print("perplexity: 1")
     max_clust_value<-10
   }else if(nrow(df_features)<=150){
     #warning("low number of files, use V1 mode")
-    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 10,check_duplicates = F))$Y)
+    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 10,check_duplicates = FALSE))$Y)
     print("perplexity: 10")
     max_clust_value<-30
   }else{
-    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 30,check_duplicates = F))$Y)
+    df_reduced<-as.data.frame((Rtsne(df_features,perplexity = 30,check_duplicates = FALSE))$Y)
     print("perplexity: 30")
     max_clust_value<-50
   }
   row.names(df_reduced)<-row.names(df_features)
-  if(nrow(df_features)<=2000 && is.null(n_batches)==T){
+  if(nrow(df_features)<=2000 && is.null(n_batches)==TRUE){
     start_1<-Sys.time()
     print("estimate ideal number of batches")
     dist_m<-as.matrix(dist(df_reduced))
@@ -172,31 +240,35 @@ get_similarity_all_plots_v2<-function(n_samples=NULL,path_dir,thr_score=0.9,
     print("Execution time:")
     print(time_taken)
     print("Done")
-  }else if(nrow(df_features)>2000 && is.null(n_batches)==T){
+  }else if(nrow(df_features)>2000 && is.null(n_batches)==TRUE){
     ggplot_no_clusters<-ggplot(df_reduced,aes(x=V1,y=V2)) + geom_point()
     ggplot_no_clusters<- ggplot_no_clusters + theme(legend.position = "none")
     show(ggplot_no_clusters)
     n_batches<-readline(prompt = "n_batches = NULL. Please, enter number of batches: ")
     n_batches<-as.integer(n_batches)
-  }else if(is.null(n_batches)==F){
+  }else if(is.null(n_batches)==FALSE){
     n_batches<-n_batches
   }
   out_clustering<-kmeans(x = df_reduced,centers = n_batches)
   clusters<-out_clustering$cluster
-  final_df<-as.data.frame(cbind(df_reduced,clusters),stringsAsFactor=F)
+  final_df<-as.data.frame(cbind(df_reduced,clusters),stringsAsFactor=FALSE)
   #------ visualize clustered reduced  df ------
-  ggplot_clusters<-ggplot(final_df,aes(x=V1,y=V2)) + geom_point(aes(colour=factor(final_df$clusters)),size=size_points_tsne)
+  ggplot_clusters<-ggplot(final_df,aes(x=V1,y=V2)) +
+    geom_point(aes(colour=factor(final_df$clusters)),size=size_points_tsne)
   ggplot_clusters<- ggplot_clusters + theme(legend.position = "none")
-  ggplot_clusters<-ggplot_clusters+ theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-                                          panel.background = element_blank(), axis.line = element_line(colour = "black"))
-  ggplot_clusters<- ggplot_clusters + theme(axis.text=element_text(size=18),axis.title.x = element_text(size = 20,face="bold"),axis.title.y = element_text(size=20,face="bold"))
+  ggplot_clusters<-ggplot_clusters+ theme(panel.grid.major = element_blank(),
+   panel.grid.minor = element_blank(), panel.background = element_blank(),
+   axis.line = element_line(colour = "black"))
+  ggplot_clusters<- ggplot_clusters + theme(axis.text=element_text(size=18),
+    axis.title.x = element_text(size = 20,face="bold"),
+    axis.title.y = element_text(size=20,face="bold"))
   
-  if(show_tsne_plot==T){
+  if(show_tsne_plot==TRUE){
     show(ggplot_clusters)
   }
   #------ get all plots names and paths input dir -----
   print("---- get all plots names input dir ----")
-  paths_all_plots<-list.files(path_dir,full.names = T,pattern = "*.csv",recursive = T)
+  paths_all_plots<-list.files(path_dir,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
   all_plots_names<-sapply(1:length(paths_all_plots),function(i){
     path_current_plot<-paths_all_plots[i]
     stringsplitted<-strsplit(path_current_plot,"/")[[1]]
@@ -208,9 +280,9 @@ get_similarity_all_plots_v2<-function(n_samples=NULL,path_dir,thr_score=0.9,
   all_groups<-unique(final_df$clusters)
   n_groups<-length(all_groups)
   print(paste0("n_groups: ",n_groups))
-  list_results<-batches_analysis(all_groups = all_groups,n_cores = n_cores,final_df = final_df,
-                                 path_dir=path_dir,
-                                 progress_bar = progress_bar,thr_score = thr_score,nboots=nboots)
+  list_results<-batches_analysis(all_groups = all_groups,n_cores = n_cores,
+    final_df = final_df, path_dir=path_dir, progress_bar = progress_bar,
+    thr_score = thr_score,nboots=nboots)
   print("--------- extract list results ------")
   list_all_df_scores<-lapply(1:length(list_results),function(i){
     list_result_i<-list_results[[i]]
@@ -233,28 +305,47 @@ get_similarity_all_plots_v2<-function(n_samples=NULL,path_dir,thr_score=0.9,
   return(list(edges=final_df_scores,nodes=final_df_nodes,df_features=df_features))
 }
 
-# function to analyze each batch
-batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progress_bar=T,nboots){
+#' function to analyze each batch
+#'
+#' @param all_groups TODOLIST
+#' @param n_cores TODOLIST
+#' @param final_df TODOLIST
+#' @param path_dir TODOLIST
+#' @param thr_score TODOLIST
+#' @param progress_bar Default TRUE
+#' @param nboots TODOLIST
+#' 
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom foreach %dopar% foreach
+#' @importFrom doSNOW registerDoSNOW 
+#' @importFrom snow makeSOCKcluster stopCluster
+#' 
+#' @return TODOLIST
+#' 
+#' @examples A <- 2+2
+#' 
+#' @noRd
+batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progress_bar=TRUE,nboots){
   splitted_path_dir<-strsplit(path_dir,"/")[[1]]
   path_dir<-paste0(splitted_path_dir,collapse = "/")
-  if(progress_bar==T){
+  if(progress_bar==TRUE){
     cl <- makeSOCKcluster(n_cores)
     registerDoSNOW(cl)
     pb<-txtProgressBar(min=0,max=length(all_groups),initial = 0,style=3)
     progress <- function(n) setTxtProgressBar(pb, n)
     opts <- list(progress=progress)
     list_results<-foreach(i=1:length(all_groups),.options.snow=opts) %dopar% {
-      library(sm)
-      library(parallel)
-      library(igraph)
-      library(visNetwork)
-      library(RColorBrewer)
-      library(utils)
-      library(pracma)
-      library(stats)
-      library(Rtsne)
-      library(ggplot2)
-      library(flowSim)
+      #library(sm)
+      #library(parallel)
+      #library(igraph)
+      #library(visNetwork)
+      #library(RColorBrewer)
+      #library(utils)
+      #library(pracma)
+      #library(stats)
+      #library(Rtsne)
+      #library(ggplot2)
+      #library(flowSim)
       current_group<-all_groups[i]
       #--- select samples name current group
       inds<-which(final_df$clusters==current_group)
@@ -277,8 +368,9 @@ batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progre
       list_df_scores<-list()
       for(j in 1:length(plot_names)){
         current_plot_name<-plot_names[j]
-        df_scores<-get_similarity_selected_plot(list_all_input_dfs = list_all_input_dfs_current_group,name_ref_plot = current_plot_name,
-                                                n_cores = n_cores, names_analyzed_vec=names_already_analyzed,n_boots = nboots)
+        df_scores<-get_similarity_selected_plot(list_all_input_dfs = list_all_input_dfs_current_group,
+          name_ref_plot = current_plot_name, n_cores = n_cores,
+          names_analyzed_vec=names_already_analyzed,n_boots = nboots)
         names_already_analyzed[j]<-current_plot_name
         list_df_scores[[j]]<-df_scores
       }
@@ -289,7 +381,7 @@ batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progre
       df_scores_all_plots$to<-as.character(df_scores_all_plots$to)
       # remove loops (connections to same node)
       check_loop<-df_scores_all_plots$from == df_scores_all_plots$to
-      inds<-which(check_loop==T)
+      inds<-which(check_loop==TRUE)
       if(length(inds)!=0){
         df_scores_all_plots<-df_scores_all_plots[-inds,]
       }
@@ -308,7 +400,7 @@ batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progre
     }
     stopCluster(cl)
     close(pb)
-  }else if(progress_bar==F){
+  }else if(progress_bar==FALSE){
     list_results<-mclapply(1:length(all_groups),function(i){
       current_group<-all_groups[i]
       #--- select samples name current group
@@ -344,7 +436,7 @@ batches_analysis<-function(all_groups,n_cores,final_df,path_dir,thr_score,progre
       df_scores_all_plots$to<-as.character(df_scores_all_plots$to)
       # remove loops (connections to same node)
       check_loop<-df_scores_all_plots$from == df_scores_all_plots$to
-      inds<-which(check_loop==T)
+      inds<-which(check_loop==TRUE)
       if(length(inds)!=0){
         df_scores_all_plots<-df_scores_all_plots[-inds,]
       }

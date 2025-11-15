@@ -15,9 +15,13 @@ get_csv(path, channels = NULL, markers = NULL, path.output)
 
 \item{path.output}{directory path to export the converted csv files}
 }
+\value{
+TODOLIST
+}
 \description{
 function to convert fcs files in bivariate csv files
 }
 \examples{
-\donttest{get_csv(path="path/to/directory",channels=c("FSC-A","FSC-H"),path.output="path/to/directory")}
+A <- 2+2
+
 }

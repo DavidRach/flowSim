@@ -4,9 +4,17 @@
 \alias{exports_filtered_plots}
 \title{exports_filtered_plots}
 \usage{
-exports_filtered_plots(visnetdata, df_features, path_expr_data,
-  path_output = NULL, n_cores = 1, type = "dens", filter_thr = 2.1,
-  plot_dendrogram = F, seed_n = 40)
+exports_filtered_plots(
+  visnetdata,
+  df_features,
+  path_expr_data,
+  path_output = NULL,
+  n_cores = 1,
+  type = "dens",
+  filter_thr = 2.1,
+  plot_dendrogram = FALSE,
+  seed_n = 40
+)
 }
 \arguments{
 \item{visnetdata}{list of dataframes containing the edges and nodes information in VisNetwork format}
@@ -20,7 +28,9 @@ If path_output=NULL, no plots are generated. Default to NULL}
 
 \item{n_cores}{Number of cores to use. Default to 1}
 
-\item{filter_thr}{float number indicating the cut height for the dendrogram generated
+\item{type}{Default dens TODOLIST}
+
+\item{filter_thr}{float number indicating the cut height for the dendrogram generated 
 by the hierarchical clustering. Default to 2.1}
 
 \item{plot_dendrogram}{If True, the plot of the dendrogram is generated (It may fail for some groups). Default to False.}
@@ -34,6 +44,5 @@ A list of the selected files names to keep for each group
 function to export only the files to keep for each group
 }
 \examples{
-\donttest{exports_filtered_plots(visnetdata=visnetdata,df_features=df_features,
-path_expr_data="path to input directory",path_output=NULL,n_cores=1,filter_thr=2.1,plot_dendrogram=F)}
+A <- 2+2
 }

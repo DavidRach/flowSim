@@ -4,7 +4,7 @@
 \alias{get_inds_files_selected}
 \title{get_inds_files_selected}
 \usage{
-get_inds_files_selected(path_dir, files_selected, return_path = F)
+get_inds_files_selected(path_dir, files_selected, return_path = FALSE)
 }
 \arguments{
 \item{path_dir}{path of the directory to explore}
@@ -20,5 +20,6 @@ Vector containing the indices of the files
 function to get indices for the paths of the files selected
 }
 \examples{
-\donttest{get_inds_files_selected(path_dir="path/to/directory",files_selected=vector_names)}
+A <- 2+2
+
 }

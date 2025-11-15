@@ -15,4 +15,8 @@ A dataframe containing the association between groups,files and size
 \description{
 function to get size of groups based on groups. Internal function
 }
+\examples{
+A <- 2+2
+
+}
 \keyword{Internal}

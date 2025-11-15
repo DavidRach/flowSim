@@ -4,17 +4,20 @@
 #' function to convert igraph network to a list of two VisNetwork dataframes containig 
 #' the edges and nodes information needed to generate a VisNetwork object
 #' @param igraph_network igraph network object
-#' @param contract_net If True, it generates a contracted version of the 
-#' VisNetwork dataframes (to visualize large datasets). Default to False
-#' @param single_nodes_black Isolated files/nodes colored in black? Default to True.
-#' @return If contracted_net=False, a list of full VisNetwork dataframes is generated, if 
-#' contracted_net=True, a list of contracted VisNetwork dataframes is returned.
+#' @param contract_net If TRUE, it generates a contracted version of the 
+#' VisNetwork dataframes (to visualize large datasets). Default to FALSE
+#' @param single_nodes_black Isolated files/nodes colored in black? Default to TRUE.
+#' 
+#' @importFrom visNetwork toVisNetworkData
+#' 
+#' @return If contracted_net=FALSE, a list of full VisNetwork dataframes is generated, if 
+#' contracted_net=TRUE, a list of contracted VisNetwork dataframes is returned.
 #' $nodes : dataframe containing the nodes information (full or contracted)
 #' $edges : dataframe containing the edges information (full or contracted)
 #' @export
-#' @examples 
-#' \donttest{gen_visnetwork_data(igraph_network=igraph_network,contract_net=F)}
-gen_visnetwork_data<-function(igraph_network,contract_net=F,single_nodes_black=T){
+#' @examples A <- 2+2
+#' 
+gen_visnetwork_data<-function(igraph_network,contract_net=FALSE,single_nodes_black=TRUE){
   data<-toVisNetworkData(igraph_network)
   data$edges$weight<-as.numeric(data$edges$weight)
   data$nodes$group<-as.character(data$nodes$group)
@@ -53,12 +56,12 @@ gen_visnetwork_data<-function(igraph_network,contract_net=F,single_nodes_black=T
   data$nodes$n_files<-vec_sizes
   data$nodes$n_files<-as.integer(data$nodes$n_files)
   #----- set colors single file clusters as black ------------
-  if(single_nodes_black==T){
+  if(single_nodes_black==TRUE){
     inds<-which(data$nodes$n_files==1)
     data$nodes$color[inds]<-"black"
   }
   #---------------------- contract network if needed
-  if(contract_net==T){
+  if(contract_net==TRUE){
     print("----- contract network ------")
     data_contracted<-contract_data(data = data)
     return(data_contracted)
@@ -74,6 +77,9 @@ gen_visnetwork_data<-function(igraph_network,contract_net=F,single_nodes_black=T
 #' @param data List of the full VisNetwork dataframe containing the edges and nodes information
 #' @keywords Internal
 #' @return A list of two VisNetwork dataframes containing the contracted information of nodes and edges
+#' 
+#' @examples A <- 2+2
+#' 
 contract_data<-function(data){
   data_contracted<-list()
   data_edges<-data$edges
@@ -101,7 +107,7 @@ contract_data<-function(data){
   }
   data_nodes_contracted<-data.frame(id=vec_ids,color=vec_color,size=vec_size,
                                     label=vec_label,title=vec_title,
-                                    files_id=vec_samples_ids,stringsAsFactors = F)
+                                    files_id=vec_samples_ids,stringsAsFactors = FALSE)
   # remove single files clusters
   inds<-which(data_nodes_contracted$size==1)
   data_nodes_contracted<-data_nodes_contracted[-inds,]
@@ -122,18 +128,18 @@ contract_data<-function(data){
     vec_groups_connected<-c()
     for(file_id in files_id_current_group){
       #print(sprintf("check connections from---to: %s",file_id))
-      inds<-grep(file_id,data_edges$from,fixed=T)
+      inds<-grep(file_id,data_edges$from,fixed=TRUE)
       data_edges_current_file<-data_edges[inds,]
       files_id_connected<-data_edges_current_file$to
       check_id<-data$nodes$id %in% files_id_connected
-      inds<-which(check_id==T)
+      inds<-which(check_id==TRUE)
       group_connected_to<-data$nodes$group[inds]
       #print("connected to group:")
       vec_groups_connected<-c(vec_groups_connected,group_connected_to)
     }
     # remove internal connections info
     check_internal_con<-vec_groups_connected %in% current_group_id
-    inds<-which(check_internal_con==T)
+    inds<-which(check_internal_con==TRUE)
     vec_groups_connected<-vec_groups_connected[-inds]
     if(length(vec_groups_connected)==0){
       vec_groups_connected<-"None"
@@ -144,7 +150,7 @@ contract_data<-function(data){
     result_check<-x=="None"
     return(unique(result_check))
   })
-  inds<-which(check_None==T)
+  inds<-which(check_None==TRUE)
   list_info_connections<-list_info_connections[-inds]
   print(list_info_connections)
   if(length(list_info_connections)==0){
@@ -175,7 +181,7 @@ contract_data<-function(data){
     temp<-rep("n_connections: ",length(vec_weight_current_group))
     vec_title_current_group<-paste0(temp,vec_weight_current_group)
     m_edges<-cbind(vec_from_current_group,vec_to_current_group,vec_weight_current_group,vec_title_current_group)
-    df_edges_current_group<-as.data.frame(m_edges,stringsAsFactors=F)
+    df_edges_current_group<-as.data.frame(m_edges,stringsAsFactors=FALSE)
     colnames(df_edges_current_group)<-c("from","to","weight","title")
     list_df_edges_all_groups[[i]]<-df_edges_current_group
   }
@@ -210,18 +216,18 @@ contract_data<-function(data){
     connections_already_analyzed<-c()
     for(i in 1:length(connections_to_fix)){
       element_i<-connections_to_fix[i]
-      connection_1<-strsplit(element_i,"+",fixed=T)[[1]][1]
-      connection_2<-strsplit(element_i,"+",fixed=T)[[1]][2]
+      connection_1<-strsplit(element_i,"+",fixed=TRUE)[[1]][1]
+      connection_2<-strsplit(element_i,"+",fixed=TRUE)[[1]][2]
       string_inverse<-paste(connection_2,connection_1,sep="+")
       if(string_inverse %in% connections_already_analyzed){
         next()
       }
       check_inverse<-connections_to_fix %in% string_inverse
-      ind_inverse<-which(check_inverse==T)
+      ind_inverse<-which(check_inverse==TRUE)
       check_current<-connections_to_fix %in% element_i
-      ind_current<-which(check_current==T)
-      # ind_inverse<-grep(string_inverse,connections_to_fix,fixed = T)
-      # ind_current<-grep(element_i,connections_to_fix,fixed = T)
+      ind_current<-which(check_current==TRUE)
+      # ind_inverse<-grep(string_inverse,connections_to_fix,fixed = TRUE)
+      # ind_current<-grep(element_i,connections_to_fix,fixed = TRUE)
       inds_couple<-c(ind_current,ind_inverse)
       if(length(inds_couple)!=2){
         print(inds_couple)
@@ -247,11 +253,11 @@ contract_data<-function(data){
       connection_1<-connections_to_fix[couple_1]
       connection_2<-connections_to_fix[couple_2]
       check_connection_1<-vec_string_connections %in% connection_1
-      ind_1<-which(check_connection_1==T)
+      ind_1<-which(check_connection_1==TRUE)
       data_edges_connection_1<-data_edges_contracted[ind_1,]
       weight_connection_1<-as.integer(data_edges_connection_1$weight)
       check_connection_2<-vec_string_connections %in% connection_2
-      ind_2<-which(check_connection_2==T)
+      ind_2<-which(check_connection_2==TRUE)
       data_edges_connection_2<-data_edges_contracted[ind_2,]
       weight_connection_2<-as.integer(data_edges_connection_2$weight)
       new_weight<-weight_connection_1+weight_connection_2

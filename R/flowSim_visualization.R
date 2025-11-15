@@ -5,10 +5,13 @@
 #' @param path_data_file Path to the csv files to visualize
 #' @param type type of visualization: "classic" or "dens". Default to classic. 
 #' the "dens" version has the density of the markers on the side of each axis.
+#' 
+#' @importFrom utils read.csv
+#' 
 #' @return Plot object
 #' @export
-#' @examples 
-#' \donttest{show_plot(path_data="path to input directory",type="classic")}
+#' @examples A <- 2+2
+#' 
 show_plot<-function(path_data_file,type="classic"){
   df_plot<-read.csv(path_data_file)
   if(type=="classic"){
@@ -24,14 +27,21 @@ show_plot<-function(path_data_file,type="classic"){
 #' 
 #' function to generate the scatter plot with colored density of the events. Internal function.
 #' @param df Dataframe containing the two markers expression data.
-#' @param plot_gate show gates?,default to False
+#' @param plot_gate show gates?,default to FALSE
+#' 
+#' @importFrom grDevices colorRampPalette densCols
+#' @importFrom graphics plot polygon
+#' 
 #' @keywords Internal
 #' @return Plot object
-flowSim_plot<-function(df,plot_gate=F){
+#' 
+#' @examples A <- 2+2
+#' 
+flowSim_plot<-function(df,plot_gate=FALSE){
   colPalette <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
   col <- densCols(df[,c(1,2)], colramp = colPalette,nbin = 200) # get colors based on bivariate density
-  plot<-graphics::plot(df[,c(1,2)],col=col,pch=".",cex=1)
-  if(plot_gate==T){
+  plot<-plot(df[,c(1,2)],col=col,pch=".",cex=1)
+  if(plot_gate==TRUE){
     print("using convex hull as gate")
     list_df_hull<-get_hull_all_gates(df)
     vec<-names(list_df_hull)
@@ -52,27 +62,34 @@ flowSim_plot<-function(df,plot_gate=F){
 #' 
 #' function to generate the denity scatter plot with density on the sides. Internal function.
 #' @param df Dataframe containing the two markers expression data.
+#' 
+#' @importFrom graphics par layout polygon
+#' @importFrom stats density
+#' 
 #' @keywords Internal
 #' @return Plot object
+#' 
+#' @examples A <- 2+2
+#' 
 flowSim_plot_dens<-function(df){
-  layout(matrix(c(0,1,2,3),byrow = T,nrow = 2),widths = c(2.5,5),heights = c(2.5,5))
+  layout(matrix(c(0,1,2,3),byrow = TRUE,nrow = 2),widths = c(2.5,5),heights = c(2.5,5))
   par(mar=rep(0,4))
   # density marker 1
   dens.chan1 <-density(df[,1])
-  graphics::plot(dens.chan1, xlim=range(df[,1]), type="l", axes=F, frame.plot=F, ann=F)
-  pts <- get_densRange(dens.chan1$x, dens.chan1$y, min(dens.chan1$x,na.rm = T), T)
+  plot(dens.chan1, xlim=range(df[,1]), type="l", axes=FALSE, frame.plot=FALSE, ann=FALSE)
+  pts <- get_densRange(dens.chan1$x, dens.chan1$y, min(dens.chan1$x,na.rm = TRUE), TRUE)
   polygon(pts$x, pts$y, col="grey", border= "black")
   
   # density marker 2
   dens.chan2 <-density(df[,2])
-  graphics::plot(dens.chan2$y, dens.chan2$x, ylim=range(df[,2]), xlim=rev(range(dens.chan2$y)),
-                 type="l", col=1,frame.plot=F,axes=F,ann=F)
-  pts <- get_densRange(dens.chan2$x, dens.chan2$y,min(dens.chan2$x,na.rm = T) , T)
+  plot(dens.chan2$y, dens.chan2$x, ylim=range(df[,2]), xlim=rev(range(dens.chan2$y)),
+                 type="l", col=1,frame.plot=FALSE,axes=FALSE,ann=FALSE)
+  pts <- get_densRange(dens.chan2$x, dens.chan2$y,min(dens.chan2$x,na.rm = TRUE) , TRUE)
   polygon(pts$y, pts$x, col="grey", border= "black")
   # bivariate density scatter plot 
   colPalette <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
   col <- densCols(df[,c(1,2)], colramp = colPalette,nbin = 200) # get colors based on bivariate density
-  plot<-graphics::plot(df[,c(1,2)],col=col,pch=".",cex=1,frame.plot=F,axes=F,ann=F)
+  plot<-plot(df[,c(1,2)],col=col,pch=".",cex=1,frame.plot=FALSE,axes=FALSE,ann=FALSE)
   return(plot)
 }
 
@@ -84,8 +101,13 @@ flowSim_plot_dens<-function(df){
 #' @param y y axis density coordinates
 #' @param thr Treshold of expression where to start the density calculation
 #' @param direction On the left (FALSE) or on the right (TRUE) of the threshold
+#' 
+#' @importFrom utils tail
 #' @keywords Internal
 #' @return Coordinates density points for the x and y axis
+#' 
+#' @examples A <- 2+2
+#' 
 get_densRange <- function(x, y, thr, direction = FALSE){
   pts <- list()
   if(is.na(direction))
@@ -111,11 +133,16 @@ get_densRange <- function(x, y, thr, direction = FALSE){
 #' @param select_group A vector indicating the names of the groups to visualize. If NULL, 
 #' all groups are visualized. Default to NULL
 #' @param size_nodes Set size of the nodes. Default to NULL.
+#' 
+#' @importFrom magrittr %>% 
+#' @importFrom visNetwork visNetwork visIgraphLayout visOptions visInteraction
+#'  visPhysics visEdges visLegend visEvents
+#' 
 #' @return VisNetwork object
 #' @export
-#' @examples 
-#' \donttest{plot_visnet(visnetdata=visnetdata,show_legend=F,remove_single_files=F,select_group=NULL)}
-plot_visnet<-function(visnetdata,remove_single_files=F,select_group=NULL,
+#' @examples A <- 2+2
+#' 
+plot_visnet<-function(visnetdata,remove_single_files=FALSE,select_group=NULL,
                       size_nodes=NULL){
   if(nrow(visnetdata$nodes)>4000){
     stop("too many nodes: plot contracted data")
@@ -123,39 +150,39 @@ plot_visnet<-function(visnetdata,remove_single_files=F,select_group=NULL,
 
   # check type of visnetwork data (contracted vs uncontracted)
   check_group<-"group" %in% colnames(visnetdata$nodes)
-  if(check_group==F){ # because contracted version (id=group),group column is NOT present
+  if(check_group==FALSE){ # because contracted version (id=group),group column is NOT present
     select_by<-"id"
   }else{
     select_by<-"group" # because uncontracted network (id=file name),group column is present
     # do you want remove single files from visualization?
-    if(remove_single_files==T){
+    if(remove_single_files==TRUE){
       inds<-which(visnetdata$nodes$n_files==1)
       visnetdata$nodes<-visnetdata$nodes[-inds,]
     }
     # plot only specific groups from uncontracted network
-    if(is.null(select_group)==F){
+    if(is.null(select_group)==FALSE){
       check_selected_group<-visnetdata$nodes$group %in% select_group
-      inds<-which(check_selected_group==T)
+      inds<-which(check_selected_group==TRUE)
       visnetdata$nodes<-visnetdata$nodes[inds,]
       check_from_id<-visnetdata$edges$from %in% visnetdata$nodes$id
-      inds<-which(check_from_id==T)
+      inds<-which(check_from_id==TRUE)
       visnetdata$edges<-visnetdata$edges[inds,]
       check_to_id<-visnetdata$edges$to %in% visnetdata$nodes$id
-      inds<-which(check_to_id==T)
+      inds<-which(check_to_id==TRUE)
       visnetdata$edges<-visnetdata$edges[inds,]
     }
   }
   # set size nodes
-  if(is.null(size_nodes)==F){
+  if(is.null(size_nodes)==FALSE){
     visnetdata$nodes$size<-rep(size_nodes,nrow(visnetdata$nodes))
   }  # generate network object
   visnet<-visNetwork(nodes = visnetdata$nodes, edges = visnetdata$edges,main = "plot clusters network") %>%
-    visIgraphLayout(randomSeed = 40,physics = T,layout = "layout_nicely") %>%
+    visIgraphLayout(randomSeed = 40,physics = TRUE,layout = "layout_nicely") %>%
     visOptions(highlightNearest = list(enabled =TRUE, degree = 1),selectedBy=list(variable=select_by,main="select by cluster")) %>%
     visInteraction(hideEdgesOnDrag = TRUE) %>%
-    visPhysics(stabilization = list(enabled=T,iterations=100,updateInterval=5),timestep = 0.5,minVelocity = 10,maxVelocity = 50) %>%
+    visPhysics(stabilization = list(enabled=TRUE,iterations=100,updateInterval=5),timestep = 0.5,minVelocity = 10,maxVelocity = 50) %>%
     visEdges(smooth = FALSE,color="black") %>%
-    visLegend(enabled = F) %>%
+    visLegend(enabled = FALSE) %>%
     visEvents(type = "once",stabilizationIterationsDone="function () {this.setOptions( { physics: false } );}") # remove physiscs when stabilization iterations are done
   return(visnet)
 }

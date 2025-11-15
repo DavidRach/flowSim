@@ -5,21 +5,25 @@
 #' @param paths_dir directory path of the input files to analyze
 #' @param paths_plots Mandatory if paths_dir==NULL, it is possible to feed a list of the paths of the input files to analyze
 #' @param n_cores The number of cores to use,default to 1
+#' 
+#' @importFrom parallel mclapply
+#' @importFrom stats setNames
+#' @importFrom utils read.csv
+#' 
 #' @return list of all input dfs
 #' @export
-#' @examples 
-#' import_all_dfs(paths_dir="path_to_input_directory",paths_plots=NULL,n_cores=1)
+#' @examples A <- 2+2
 
 import_all_dfs<-function(n_samples=NULL,paths_dir=NULL,paths_plots=NULL,n_cores=1){
   start<-Sys.time()
-  if(is.null(paths_dir)==T && is.null(paths_plots)==T){
+  if(is.null(paths_dir)==TRUE && is.null(paths_plots)==TRUE){
     stop("Path error: specify a folder or a list of paths")
-  }else if(is.null(paths_dir)==F){
-    paths_all_plots<-list.files(paths_dir,full.names = T,pattern = "*.csv",recursive = T)
-  }else if(is.null(paths_dir)==T){
+  }else if(is.null(paths_dir)==FALSE){
+    paths_all_plots<-list.files(paths_dir,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
+  }else if(is.null(paths_dir)==TRUE){
     paths_all_plots<-paths_plots
   }
-  if(is.null(n_samples)==F){
+  if(is.null(n_samples)==FALSE){
     paths_all_plots<-paths_all_plots[n_samples]
   }
   print("--- all plot names extraction ----")
@@ -28,24 +32,24 @@ import_all_dfs<-function(n_samples=NULL,paths_dir=NULL,paths_plots=NULL,n_cores=
     plot_name<-tail(stringsplitted,1)
     return(c(plot_name,paths_all_plots[i]))
   },mc.cores = n_cores)
-  df_names_vs_paths<-as.data.frame(do.call(rbind,list_all_input_plot_names),stringsAsFactors=F)
+  df_names_vs_paths<-as.data.frame(do.call(rbind,list_all_input_plot_names),stringsAsFactors=FALSE)
   colnames(df_names_vs_paths)<-c("name","path")
   print("-----Pre-allocation of df in list-----")
   vec_all_input_plot_names<-df_names_vs_paths$name
   list_all_input_dfs<-mclapply(setNames(vec_all_input_plot_names,vec_all_input_plot_names),function(name){
-    ind_name<-which((vec_all_input_plot_names %in% name)==T)
+    ind_name<-which((vec_all_input_plot_names %in% name)==TRUE)
     path_current_plot<-df_names_vs_paths$path[ind_name]
     if(length(path_current_plot)!=1){
       stop("path_current_plot has lenght != 1")
     }
     df<-try(read.csv(path_current_plot))
-    if(is.data.frame(df)==F){
+    if(is.data.frame(df)==FALSE){
       return(NULL)
     }
-    if(is.numeric(df[,1])==F || is.numeric(df[,2])==F){
+    if(is.numeric(df[,1])==FALSE || is.numeric(df[,2])==FALSE){
       return(NULL)
     }
-    if(any(is.na(df[,1]))==T || any(is.na(df[,2]))==T){
+    if(any(is.na(df[,1]))==TRUE || any(is.na(df[,2]))==TRUE){
       return(NULL)
     }
     if(length(df[,1])<6 || length(df[,2])<6){
@@ -71,44 +75,52 @@ import_all_dfs<-function(n_samples=NULL,paths_dir=NULL,paths_plots=NULL,n_cores=
 #' @param paths_plots Mandatory if paths_dir==NULL, it is possible to feed a list of the paths of the input files to analyze
 #' @param n_cores The number of cores to use, default to 1
 #' @param progress_bar If False,progress bar is disabled. Default to True
+#' 
+#' @importFrom utils read.csv setTxtProgressBar txtProgressBar tail
+#' @importFrom stats density
+#' @importFrom parallel mclapply
+#' @importFrom foreach %dopar% foreach
+#' @importFrom doSNOW registerDoSNOW 
+#' @importFrom snow makeSOCKcluster stopCluster
+#' @importFrom pracma findpeaks
+#' 
 #' @return a dataframe of the features set (columns) for each file (row)
 #' @export
-#' @examples 
-#' import_df_features(n_samples=1:5,paths_dir="path_to_input_directory",n_cores=1)
-import_df_features<-function(n_samples=NULL,paths_dir=NULL,n_cores=1,paths_plots=NULL,progress_bar=T){
+#' @examples A <- 2+2
+import_df_features<-function(n_samples=NULL,paths_dir=NULL,n_cores=1,paths_plots=NULL,progress_bar=TRUE){
   start<-Sys.time()
   print("--- get paths all plots -----")
-  if(is.null(paths_dir)==T && is.null(paths_plots)==T){
+  if(is.null(paths_dir)==TRUE && is.null(paths_plots)==TRUE){
     stop("Path error: specify a folder or a list of paths")
-  }else if(is.null(paths_dir)==F){
-    paths_all_plots<-list.files(paths_dir,full.names = T,pattern = "*.csv",recursive = T)
-  }else if(is.null(paths_dir)==T){
+  }else if(is.null(paths_dir)==FALSE){
+    paths_all_plots<-list.files(paths_dir,full.names = TRUE,pattern = "*.csv",recursive = TRUE)
+  }else if(is.null(paths_dir)==TRUE){
     paths_all_plots<-paths_plots
   }  
-  if(is.null(n_samples)==F){
+  if(is.null(n_samples)==FALSE){
     paths_all_plots<-paths_all_plots[n_samples]
   }
   print("---------- features extraction from each plot ----------")
-  if(progress_bar==T){
+  if(progress_bar==TRUE){
     cl <- makeSOCKcluster(n_cores)
     registerDoSNOW(cl)
     pb<-txtProgressBar(min=0,max=length(paths_all_plots),initial = 0,style=3)
     progress <- function(n) setTxtProgressBar(pb, n)
     opts <- list(progress=progress)
     list_all_plots_info<-foreach(i=1:length(paths_all_plots),.options.snow=opts) %dopar% {
-      library(pracma)
-      library(stats)
-      library(data.table)
+      #library(pracma)
+      #library(stats)
+      #library(data.table)
       stringsplitted<-strsplit(paths_all_plots[i],"/")[[1]]
       plot_name<-tail(stringsplitted,1)
       df<-try(read.csv(paths_all_plots[i]))
-      if(is.data.frame(df)==F){
+      if(is.data.frame(df)==FALSE){
         return(NULL)
       }
-      if(is.numeric(df[,1])==F || is.numeric(df[,2])==F){
+      if(is.numeric(df[,1])==FALSE || is.numeric(df[,2])==FALSE){
         return(NULL)
       }
-      if(any(is.na(df[,1]))==T || any(is.na(df[,2]))==T){
+      if(any(is.na(df[,1]))==TRUE || any(is.na(df[,2]))==TRUE){
         return(NULL)
       }
       if(length(df[,1])<6 || length(df[,2])<6){
@@ -148,13 +160,13 @@ import_df_features<-function(n_samples=NULL,paths_dir=NULL,n_cores=1,paths_plots
       stringsplitted<-strsplit(paths_all_plots[i],"/")[[1]]
       plot_name<-tail(stringsplitted,1)
       df<-try(read.csv(paths_all_plots[i]))
-      if(is.data.frame(df)==F){
+      if(is.data.frame(df)==FALSE){
         return(NULL)
       }
-      if(is.numeric(df[,1])==F || is.numeric(df[,2])==F){
+      if(is.numeric(df[,1])==FALSE || is.numeric(df[,2])==FALSE){
         return(NULL)
       }
-      if(any(is.na(df[,1]))==T || any(is.na(df[,2]))==T){
+      if(any(is.na(df[,1]))==TRUE || any(is.na(df[,2]))==TRUE){
         return(NULL)
       }
       if(length(df[,1])<6 || length(df[,2])<6){
@@ -187,7 +199,7 @@ import_df_features<-function(n_samples=NULL,paths_dir=NULL,n_cores=1,paths_plots
     },mc.cores = n_cores)
   }
   print("---- combine all plots features in one df-------")
-  df_features<-as.data.frame(do.call(rbind,list_all_plots_info),stringsAsFactors=F)
+  df_features<-as.data.frame(do.call(rbind,list_all_plots_info),stringsAsFactors=FALSE)
   
   
   colnames(df_features)<-c("plot_name","mean_m1","mean_m2",

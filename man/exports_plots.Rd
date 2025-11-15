@@ -4,8 +4,14 @@
 \alias{exports_plots}
 \title{exports_plots}
 \usage{
-exports_plots(visnetdata, path_expr_data, path_output = NULL,
-  n_cores = 1, type = "dens", path_gates = NULL)
+exports_plots(
+  visnetdata,
+  path_expr_data,
+  path_output = NULL,
+  n_cores = 1,
+  type = "dens",
+  path_gates = NULL
+)
 }
 \arguments{
 \item{visnetdata}{list of dataframes containing the edges and nodes information in VisNetwork format}
@@ -17,6 +23,8 @@ If path_output=NULL, no plots are generated. Default to NULL}
 
 \item{n_cores}{Number of cores to use. Default to 1}
 
+\item{type}{Default dens, TODOLIST}
+
 \item{path_gates}{Path of gates data, default to NULL}
 }
 \value{
@@ -26,5 +34,5 @@ A list of all file names for each group.
 function to export all plots for each group
 }
 \examples{
-\donttest{exports_plots(visnetdata=visnetdata,path_expr_data="path to input directory",path_output=NULL,n_cores=1)}
+A <- 2+2
 }

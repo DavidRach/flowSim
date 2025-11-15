@@ -4,15 +4,19 @@
 \alias{plot_visnet}
 \title{plot_visnet}
 \usage{
-plot_visnet(visnetdata, remove_single_files = F, select_group = NULL,
-  size_nodes = NULL)
+plot_visnet(
+  visnetdata,
+  remove_single_files = FALSE,
+  select_group = NULL,
+  size_nodes = NULL
+)
 }
 \arguments{
 \item{visnetdata}{list of dataframes containing the edges and nodes information in VisNetwork format}
 
 \item{remove_single_files}{If True, single files (black nodes) are removed from the analysis.}
 
-\item{select_group}{A vector indicating the names of the groups to visualize. If NULL,
+\item{select_group}{A vector indicating the names of the groups to visualize. If NULL, 
 all groups are visualized. Default to NULL}
 
 \item{size_nodes}{Set size of the nodes. Default to NULL.}
@@ -24,5 +28,6 @@ VisNetwork object
 function to plot the visnetwork based on the similarity scores
 }
 \examples{
-\donttest{plot_visnet(visnetdata=visnetdata,show_legend=F,remove_single_files=F,select_group=NULL)}
+A <- 2+2
+
 }

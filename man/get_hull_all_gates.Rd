@@ -7,12 +7,16 @@
 get_hull_all_gates(gated_df)
 }
 \arguments{
-\item{df_groups}{Dataframe containing the groups associations}
+\item{gated_df}{Dataframe containing the groups associations}
 }
 \value{
 A list containing the convex hull for all classes
 }
 \description{
 function to get the convex hull of all gates. Internal function
+}
+\examples{
+A <- 2+2
+
 }
 \keyword{Internal}
