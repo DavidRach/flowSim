@@ -15,6 +15,9 @@ rename_files(path_dir, to_replace, string, to_replace_fixed = TRUE)
 
 \item{to_replace_fixed}{if False, to_replace can be also a regex expression. Default to True.}
 }
+\value{
+TODOLIST
+}
 \description{
 Function to rename files within a directory
 }

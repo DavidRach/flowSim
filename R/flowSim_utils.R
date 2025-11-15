@@ -249,7 +249,7 @@ get_inds_files_selected<-function(path_dir,files_selected,return_path=FALSE){
 #' @param to_replace Pattern to replace. if to_replace_fixed=FALSE, regex expression can be used. 
 #' @param string string to replace the pattern selected
 #' @param to_replace_fixed if False, to_replace can be also a regex expression. Default to True.
-#' @return NULL
+#' @return TODOLIST
 #' @export
 #' @examples A <- 2+2
 #' 

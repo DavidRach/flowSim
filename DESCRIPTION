@@ -8,7 +8,7 @@ Authors@R:
            email = "semont93@gmail.com",
 		   comment = c(ORCID = "0000-0002-6717-8706"))
 Description: flowSim is a tool designed to remove redundant examples from a bivariate FCM dataset. It also includes several visualization options to easily identify the similarity relationships between the files. It can be used to improve the quality of training for machine learning algorithms or to identify outliers.
-License: License: GPL-3
+License: License: GPL-3 | file LICENSE
 Encoding: UTF-8
 URL: https://davidrach.github.io/flowSim/
 BugReports: https://github.com/semontante/flowSim/issues
@@ -16,7 +16,6 @@ RoxygenNote: 7.3.2
 Imports:
 	anocva,
 	concaveman,
-	data.table,
 	doSNOW,
 	flowCore,
 	foreach,
@@ -34,6 +33,7 @@ Imports:
 	utils,
 	visNetwork
 Suggests:
+	data.table,
 	devtools,
 	knitr,
 	markdown,

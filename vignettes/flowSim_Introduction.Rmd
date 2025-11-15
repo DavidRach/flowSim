@@ -1,5 +1,5 @@
 ---
-title: "flowSim introduction"
+title: "flowSim Introduction"
 author: "Sebastiano Montante"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
